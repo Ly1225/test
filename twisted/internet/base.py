@@ -1279,6 +1279,7 @@ class _SignalReactorMixin(object):
 
 
     def run(self, installSignalHandlers=True):
+        print("start run====")
         self.startRunning(installSignalHandlers=installSignalHandlers)
         self.mainLoop()
 

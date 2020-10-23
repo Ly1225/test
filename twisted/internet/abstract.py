@@ -182,6 +182,8 @@ class FileDescriptor(_ConsumerMixin, _LogOwner):
             use to get readable and writeable event notifications.  If no value
             is given, the global reactor will be used.
         """
+        print("abstract reactor:")
+        print(reactor)
         if not reactor:
             from twisted.internet import reactor
         self.reactor = reactor

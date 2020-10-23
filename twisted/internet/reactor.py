@@ -36,4 +36,5 @@ from __future__ import division, absolute_import
 import sys
 del sys.modules['twisted.internet.reactor']
 from twisted.internet import default
+print("reactor line 39")
 default.install()

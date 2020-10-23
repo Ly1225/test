@@ -1,15 +1,35 @@
-from twisted.internet import protocol, reactor
+from twisted.internet import reactor, protocol
 
-class Echo(protocol.Protocol):
-    def dataReceived(self, data):
-        # As soon as any data is received, write it back
-        self.transport.write(data)
+print("server line 3 ===============")
+
+class EchoClient(protocol.Protocol):
+    def connectionMade(self):
+        self.transport.write("hello, world!")
 
 
-class EchoFactory(protocol.Factory):
+def dataReceived(self, data):
+    print "Server said:", data
+    self.transport.loseConnection()
+
+
+def connectionLost(self, reason):
+    print "connection lost"
+
+
+class EchoFactory(protocol.ClientFactory):
     def buildProtocol(self, addr):
-        return Echo()
+        return EchoClient()
 
 
-reactor.listenTCP(8000, EchoFactory())
+def clientConnectionFailed(self, connector, reason):
+    print "Connection failed - goodbye!"
+    reactor.stop()
+
+
+def clientConnectionLost(self, connector, reason):
+    print "Connection lost - goodbye!"
+    reactor.stop()
+
+
+reactor.connectTCP("localhost", 8000, EchoFactory())
 reactor.run()

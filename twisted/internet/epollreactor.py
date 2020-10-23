@@ -66,6 +66,7 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         # Create the poller we're going to use.  The 1024 here is just a hint
         # to the kernel, it is not a hard maximum.  After Linux 2.6.8, the size
         # argument is completely ignored.
+        print("epoll reactor line 69====")
         self._poller = epoll(1024)
         self._reads = set()
         self._writes = set()
@@ -105,6 +106,7 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         """
         Add a FileDescriptor for notification of data available to read.
         """
+        print("add reader line 109 ======")
         try:
             self._add(reader, self._reads, self._writes, self._selectables,
                       EPOLLIN, EPOLLOUT)
@@ -241,6 +243,7 @@ def install():
     """
     Install the epoll() reactor.
     """
+    print("epoll reactor line 244======")
     p = EPollReactor()
     from twisted.internet.main import installReactor
     installReactor(p)

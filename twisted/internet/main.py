@@ -28,10 +28,11 @@ def installReactor(reactor):
     # this stuff should be common to all reactors.
     import twisted.internet
     import sys
+    print(sys.modules)
     if 'twisted.internet.reactor' in sys.modules:
         raise error.ReactorAlreadyInstalledError("reactor already installed")
     twisted.internet.reactor = reactor
     sys.modules['twisted.internet.reactor'] = reactor
-
+    print(sys.modules)
 
 __all__ = ["CONNECTION_LOST", "CONNECTION_DONE", "installReactor"]

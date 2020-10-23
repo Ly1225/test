@@ -1295,9 +1295,13 @@ class Port(base.BasePort, _SocketCloser):
     def __init__(self, port, factory, backlog=50, interface='', reactor=None):
         """Initialize with a numeric port to listen on.
         """
+        print("port init line 1298 ======")
         base.BasePort.__init__(self, reactor=reactor)
+        print("port :", port)
         self.port = port
         self.factory = factory
+        print("factory :")
+        print(factory.__dict__)
         self.backlog = backlog
         if abstract.isIPv6Address(interface):
             self.addressFamily = socket.AF_INET6
@@ -1349,7 +1353,9 @@ class Port(base.BasePort, _SocketCloser):
         This is called on unserialization, and must be called after creating a
         server to begin listening on the specified port.
         """
+        print("start listening line 1352======")
         _reservedFD.reserve()
+        print('self._preexistingSocket:',self._preexistingSocket)
         if self._preexistingSocket is None:
             # Create a new socket and make it listen
             try:
@@ -1380,6 +1386,7 @@ class Port(base.BasePort, _SocketCloser):
         # can explain it, perhaps we should re-arrange them.
         self.factory.doStart()
         self.connected = True
+        print("socket line 1385===============")
         self.socket = skt
         self.fileno = self.socket.fileno
         self.numberAccepts = 100
