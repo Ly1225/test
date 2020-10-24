@@ -875,7 +875,9 @@ class ReactorBase(PluggableResolverMixin):
         """
         Run all pending timed calls.
         """
+        print("runUntilCurrent")
         if self.threadCallQueue:
+            print("threadCallQueue")
             # Keep track of how many calls we actually make, as we're
             # making them, in case another call is added to the queue
             # while we're in this loop.
@@ -898,6 +900,7 @@ class ReactorBase(PluggableResolverMixin):
 
         now = self.seconds()
         while self._pendingTimedCalls and (self._pendingTimedCalls[0].time <= now):
+            print("heappop")
             call = heappop(self._pendingTimedCalls)
             if call.cancelled:
                 self._cancellations-=1
@@ -909,6 +912,7 @@ class ReactorBase(PluggableResolverMixin):
                 continue
 
             try:
+                print("call.func")
                 call.called = 1
                 call.func(*call.args, **call.kw)
             except:
@@ -922,9 +926,10 @@ class ReactorBase(PluggableResolverMixin):
                     e += "\n"
                     log.msg(e)
 
-
+        print("929")
         if (self._cancellations > 50 and
              self._cancellations > len(self._pendingTimedCalls) >> 1):
+            print("_cancellations")
             self._cancellations = 0
             self._pendingTimedCalls = [x for x in self._pendingTimedCalls
                                        if not x.cancelled]
@@ -1283,10 +1288,10 @@ class _SignalReactorMixin(object):
         self.startRunning(installSignalHandlers=installSignalHandlers)
         self.mainLoop()
 
-
     def mainLoop(self):
         while self._started:
             try:
+                print("self._started:")
                 while self._started:
                     # Advance simulation time in delayed event
                     # processors.

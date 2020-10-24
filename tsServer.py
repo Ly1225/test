@@ -1,4 +1,5 @@
 from ts.internet.reactor import Reactor
 
-r = Reactor()
-r.test()
+#reactor global variable
+reactor = Reactor()
+reactor.test()

@@ -1296,6 +1296,7 @@ class Port(base.BasePort, _SocketCloser):
         """Initialize with a numeric port to listen on.
         """
         print("port init line 1298 ======")
+        print(reactor)
         base.BasePort.__init__(self, reactor=reactor)
         print("port :", port)
         self.port = port
@@ -1403,6 +1404,7 @@ class Port(base.BasePort, _SocketCloser):
         This accepts a connection and calls self.protocol() to handle the
         wire-level protocol.
         """
+        print("BasePort doRead=====")
         try:
             if platformType == "posix":
                 numAccepts = self.numberAccepts

@@ -82,7 +82,12 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         It takes care of adding it if  new or modifying it if already added
         for another state (read -> read/write for example).
         """
+        #('xer', <<class 'twisted.internet.tcp.Port'> of __main__.EchoFactory on 8000>)
+        print("event:")
+        print(event)
         fd = xer.fileno()
+        print("fd:")
+        print(fd)
         if fd not in primary:
             flags = event
             # epoll_ctl can raise all kinds of IOErrors, and every one
@@ -107,6 +112,7 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         Add a FileDescriptor for notification of data available to read.
         """
         print("add reader line 109 ======")
+        print("reader:",reader)
         try:
             self._add(reader, self._reads, self._writes, self._selectables,
                       EPOLLIN, EPOLLOUT)
@@ -209,6 +215,7 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         """
         Poll the poller for new events.
         """
+        print("time out", timeout)
         if timeout is None:
             timeout = -1  # Wait indefinitely.
 
@@ -230,20 +237,20 @@ class EPollReactor(posixbase.PosixReactorBase, posixbase._PollLikeMixin):
         _drdw = self._doReadOrWrite
         for fd, event in l:
             try:
+                print("selectable = self._selectables[fd]")
                 selectable = self._selectables[fd]
             except KeyError:
                 pass
             else:
+                print("epoll reactor log.callWithLogger=====")
                 log.callWithLogger(selectable, _drdw, selectable, fd, event)
 
     doIteration = doPoll
-
 
 def install():
     """
     Install the epoll() reactor.
     """
-    print("epoll reactor line 244======")
     p = EPollReactor()
     from twisted.internet.main import installReactor
     installReactor(p)

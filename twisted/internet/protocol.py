@@ -70,6 +70,8 @@ class Factory:
 
         Users should not call this function themselves!
         """
+        print("doStart line 73 ======")
+        print("self.numPorts:", self.numPorts)
         if not self.numPorts:
             if self.noisy:
                 _loggerFor(self).info("Starting factory {factory!r}",
@@ -107,6 +109,7 @@ class Factory:
         are best put off until things are actually running, such
         as connecting to a database, opening files, etcetera.
         """
+        print("start factory 112 ======")
 
 
     def stopFactory(self):
