@@ -38,7 +38,6 @@ class Reactor(object):
                     continue
 
     def listenTCP(self, port, factory, backlog=50, interface=''):
-
         # Create a new socket and make it listen
         # 创建并绑定套接字，开始监听。
         skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -53,7 +52,6 @@ class Reactor(object):
 
         factory.doStart()
 
-        #暂时保留Port
         self._reads.add(skt)
 
     def startRunning(self):

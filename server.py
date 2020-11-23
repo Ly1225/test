@@ -2,6 +2,7 @@
 from ts.internet import protocol,factory
 from ts.internet.reactor import reactor
 
+
 class Echo(protocol.Protocol):
     def dataReceived(self, data):
         # As soon as any data is received, write it back
@@ -13,9 +14,6 @@ class EchoFactory(factory.Factory):
     def buildProtocol(self, addr):
         return Echo()
 
-
-
-
 #reactor global variable
-reactor.listenTCP(9000, EchoFactory())
-reactor.run()
+# reactor.listenTCP(9000, EchoFactory())
+# reactor.run()
