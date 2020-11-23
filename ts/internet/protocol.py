@@ -1,10 +1,4 @@
-class Factory(object):
-    def doStart(self):
-        self.startFactory()
-
-    def startFactory(self):
-        pass
-
+#coding:utf-8
 class BaseProtocol:
     """
     This is the abstract superclass of all protocols.
@@ -81,7 +75,7 @@ class Protocol(BaseProtocol):
             differing chunk sizes, down to one byte at a time.
         """
 
-    def connectionLost(self, reason=connectionDone):
+    def connectionLost(self, reason):
         """
         Called when the connection is shut down.
 

@@ -1,96 +1,60 @@
-from select import  epoll, EPOLLHUP,EPOLLIN, EPOLLOUT
+#coding:utf-8
+import socket,select
 
 class Reactor(object):
+    # Actual port number being listened on, only set to a non-None
+    # value when we are actually listening.
+    _realPortNumber = None
+
+    # An externally initialized socket that we will use, rather than creating
+    # our own.
+    _preexistingSocket = None
+
     def __init__(self):
-        print("Reactor init")
-        self._poller = epoll(1024)
         self._reads = set()
         self._writes = set()
-        self._selectables = {}
-        # self._continuousPolling = posixbase._ContinuousPolling(self)
         # posixbase.PosixReactorBase.__init__(self)
 
     def test(self):
         print("reactor test")
 
-    def _add(self, xer, primary, other, selectables, event, antievent):
+    def doSelect(self, timeout):
         """
-        Private method for adding a descriptor from the event loop.
+        Run one iteration of the I/O monitor loop.
 
-        It takes care of adding it if  new or modifying it if already added
-        for another state (read -> read/write for example).
+        This will run all selectables who had input or output readiness
+        waiting for them.
         """
-        fd = xer.fileno()
-        if fd not in primary:
-            flags = event
-            # epoll_ctl can raise all kinds of IOErrors, and every one
-            # indicates a bug either in the reactor or application-code.
-            # Let them all through so someone sees a traceback and fixes
-            # something.  We'll do the same thing for every other call to
-            # this method in this file.
-            if fd in other:
-                flags |= antievent
-                self._poller.modify(fd, flags)
-            else:
-                self._poller.register(fd, flags)
+        # 调用select方法监控读写集合，返回准备好读写的描述符
+        r, w, ignored = select.select(self._reads,self._writes,[], timeout)
 
-            # Update our own tracking state *only* after the epoll call has
-            # succeeded.  Otherwise we may get out of sync.
-            primary.add(fd)
-            selectables[fd] = xer
-
-    def addReader(self, reader):
-        """
-        Add a FileDescriptor for notification of data available to read.
-        """
-        try:
-            self._add(reader, self._reads, self._writes, self._selectables,
-                      EPOLLIN, EPOLLOUT)
-        except IOError as e:
-            print(e.__dict__)
-
-    def startReading(self):
-        """Start waiting for read availability.
-        """
-        self.addReader(self)
+        _drdw = self._doReadOrWrite
+        for selectables, method, fdset in ((r, "doRead", self._reads),
+                                           (w,"doWrite", self._writes)):
+            for selectable in selectables:
+                # if this was disconnected in another thread, kill it.
+                # ^^^^ --- what the !@#*?  serious!  -exarkun
+                if selectable not in fdset:
+                    continue
 
     def listenTCP(self, port, factory, backlog=50, interface=''):
-        print("Port startListening")
-        if self._preexistingSocket is None:
-            # Create a new socket and make it listen
-            try:
-                skt = socket.socket(self.addressFamily, self.socketType)
-                skt.setblocking(0)
-                skt.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                addr = (self.interface, self.port)
-                skt.bind(addr)
-            except socket.error as le:
-                print("CannotListenError")
-                exit()
-            skt.listen(self.backlog)
-        else:
-            # Re-use the externally specified socket
-            skt = self._preexistingSocket
-            self._preexistingSocket = None
 
-        # Make sure that if we listened on port 0, we update that to
-        # reflect what the OS actually assigned us.
-        self._realPortNumber = skt.getsockname()[1]
-        print("%s starting on %s")
-        print("%s starting on %s" % (
-                self._getLogPrefix(self.factory), self._realPortNumber))
-        # log.msg("%s starting on %s" % (
-        #         self._getLogPrefix(self.factory), self._realPortNumber))
+        # Create a new socket and make it listen
+        # 创建并绑定套接字，开始监听。
+        skt = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        skt.setblocking(0)
+        skt.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        addr = (interface, port)
+        # print("addr:",addr)
+        # 绑定
+        skt.bind(addr)
+        #监听
+        skt.listen(backlog)
 
-        # The order of the next 5 lines is kind of bizarre.  If no one
-        # can explain it, perhaps we should re-arrange them.
-        self.factory.doStart()
-        self.connected = True
-        self.socket = skt
-        self.fileno = self.socket.fileno
-        self.numberAccepts = 100
+        factory.doStart()
 
-        self.startReading()
+        #暂时保留Port
+        self._reads.add(skt)
 
     def startRunning(self):
         """
@@ -105,35 +69,38 @@ class Reactor(object):
         guarantee is that it will be on its way to the running state.
         """
         if self._started:
-            raise error.ReactorAlreadyRunning()
-        if self._startedBefore:
-            raise error.ReactorNotRestartable()
+            print("ReactorAlreadyRunning")
+            exit()
         self._started = True
         self._stopped = False
-        if self._registerAsIOThread:
-            threadable.registerAsIOThread()
-        self.fireSystemEvent('startup')
+
+    def runUntilCurrent(self):
+        """
+        Run all pending timed calls.
+        """
+        print("runUntilCurrent")
 
     def mainLoop(self):
+        #mianLoop就是最终的主循环了，在循环中，调用doIteration方法监控读写描述符的集合，
+        # 一旦发现有描述符准备好读写，就会调用相应的事件处理程序。
         while self._started:
             try:
-                print("self._started:")
                 while self._started:
                     # Advance simulation time in delayed event
                     # processors.
                     self.runUntilCurrent()
                     t2 = self.timeout()
                     t = self.running and t2
-                    self.doIteration(t)
+                    #关键
+                    self.doSelect(t)
             except:
-                log.msg("Unexpected error in main loop.")
-                log.err()
+                print("Unexpected error in main loop.")
             else:
-                log.msg('Main loop terminated.')
+                print('Main loop terminated.')
 
-    def run(self, installSignalHandlers=True):
+    def run(self):
         print("===start run")
-        self.startRunning(installSignalHandlers=installSignalHandlers)
+        self.startRunning()
         self.mainLoop()
 
 #单例模式
