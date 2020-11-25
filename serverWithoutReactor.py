@@ -46,5 +46,6 @@ while 1:
     # self.runUntilCurrent()
 
     # t2 = self.timeout()
-    # t = self.running and t2
-    # self.doIteration(t)
+    # timeout = self.running and t2
+    # self.doSelect(t)
+    r, w, ignored = select.select(reads, writes,[])

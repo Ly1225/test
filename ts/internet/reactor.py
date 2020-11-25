@@ -67,7 +67,6 @@ class Reactor(object):
         guarantee is that it will be on its way to the running state.
         """
         if self._started:
-            print("ReactorAlreadyRunning")
             exit()
         self._started = True
         self._stopped = False
@@ -76,7 +75,6 @@ class Reactor(object):
         """
         Run all pending timed calls.
         """
-        print("runUntilCurrent")
 
     def mainLoop(self):
         #mianLoop就是最终的主循环了，在循环中，调用doIteration方法监控读写描述符的集合，
@@ -97,7 +95,6 @@ class Reactor(object):
                 print('Main loop terminated.')
 
     def run(self):
-        print("===start run")
         self.startRunning()
         self.mainLoop()
 
